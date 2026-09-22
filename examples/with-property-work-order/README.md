@@ -36,11 +36,17 @@ corepack pnpm exec next dev -H 0.0.0.0 -p 3010
 ## 部署到 Vercel
 
 1. 导入整个 `assistant-ui` monorepo（本示例依赖 `workspace:*` 包）。
-2. Root Directory 可设为仓库根；Build 使用 filter，或将 Root 设为 `examples/with-property-work-order` 并确保 monorepo install 可用。
-3. 在 Vercel Project → Settings → Environment Variables 添加 `DEEPSEEK_API_KEY`。
-4. 部署后访问站点；打开 `/api/agent` 确认 `llmEnabled: true`。
+2. Root Directory 设为 `examples/with-property-work-order`。
+3. Build 设置（也可写在本目录 `vercel.json`）：
+   - Install：`cd ../.. && pnpm install --filter with-property-work-order... --workspace-root`（EdgeOne **不要** `corepack enable`；Vercel 可加）
+   - Build：`cd ../.. && pnpm exec turbo build --concurrency=1 --filter=@assistant-ui/react... --filter=@assistant-ui/react-markdown... --filter=@assistant-ui/next... && pnpm --filter with-property-work-order run build`
+   - Node.js：`24.x`（monorepo `engines` 要求 ≥24.11）
+4. 在项目环境变量中添加 `DEEPSEEK_API_KEY`（及可选 `DEEPSEEK_MODEL` / `DEEPSEEK_BASE_URL`）。
+5. 部署后访问站点；打开 `/api/agent` 确认 `llmEnabled: true`。
 
+> 不要用 `--filter=with-property-work-order...` 做 turbo build：会连带编 vue/rn 等无关包，EdgeOne `/dev/shm` 容易磁盘满（ENOSPC）。
 > 不要使用 `output: 'export'` 纯静态导出，否则无法运行 `/api/agent` Serverless。
+> EdgeOne Pages 可用同目录 `edgeone.json` 覆盖 Install/Build。
 
 ## 演示路径
 
