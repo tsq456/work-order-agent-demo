@@ -1,5 +1,5 @@
 {
   "framework": "nextjs",
-  "installCommand": "cd ../.. && corepack enable && pnpm install --filter with-property-work-order... --workspace-root",
+  "installCommand": "cd ../.. && corepack enable && pnpm install --filter with-property-work-order... --workspace-root --ignore-scripts",
   "buildCommand": "cd ../.. && pnpm exec turbo build --concurrency=1 --filter=@assistant-ui/react... --filter=@assistant-ui/react-markdown... --filter=@assistant-ui/next... && pnpm --filter with-property-work-order run build"
 }
