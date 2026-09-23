@@ -6,18 +6,20 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "edgeone:ci": "bash ./scripts/edgeone-ci.sh"
   },
   "dependencies": {
     "@assistant-ui/react": "workspace:*",
     "@assistant-ui/react-markdown": "workspace:*",
-    "@assistant-ui/ui": "workspace:*",
+    "@base-ui/react": "^1.8.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
     "lucide-react": "^1.46.0",
     "next": "^16.3.5",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@assistant-ui/next": "workspace:*",
