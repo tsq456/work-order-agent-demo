@@ -10,7 +10,6 @@ import {
   type ThinkingResult,
 } from "@/lib/deepseek";
 import { GUIDE_HINT_SEEDS } from "@/lib/mock-data";
-import { SOURCE_OPTIONS } from "@/lib/dictionaries";
 
 function pickEnum(value: unknown, options: readonly string[], fallback: string) {
   if (typeof value === "string" && options.includes(value)) return value;
