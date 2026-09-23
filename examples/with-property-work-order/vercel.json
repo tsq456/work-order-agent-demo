@@ -1,5 +1,5 @@
 {
   "framework": "nextjs",
-  "installCommand": "cd ../.. && pnpm install --ignore-scripts --filter=with-property-work-order --filter=@assistant-ui/react --filter=@assistant-ui/react-markdown --filter=@assistant-ui/next --filter=@assistant-ui/core --filter=@assistant-ui/store --filter=@assistant-ui/tap --filter=@assistant-ui/x-buildutils --filter=@assistant-ui/x-generative-compiler --filter=@assistant-ui/vite --filter=assistant-stream --filter=assistant-cloud --filter=safe-content-frame",
-  "buildCommand": "cd ../.. && pnpm dlx turbo@2.10.13 build --concurrency=1 --filter=@assistant-ui/react --filter=@assistant-ui/react-markdown --filter=@assistant-ui/next && pnpm --filter with-property-work-order run build"
+  "installCommand": "bash ./scripts/vercel-ci.sh install",
+  "buildCommand": "bash ./scripts/vercel-ci.sh build"
 }

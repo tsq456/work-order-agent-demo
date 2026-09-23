@@ -38,15 +38,20 @@ corepack pnpm exec next dev -H 0.0.0.0 -p 3010
 1. 导入整个 `assistant-ui` monorepo（本示例依赖 `workspace:*` 包）。
 2. Root Directory 设为 `examples/with-property-work-order`。
 3. Build 设置（也可写在本目录 `edgeone.json` / `vercel.json`）：
-   - Install（**不要**加 `--workspace-root`，**不要**用 `pkg...` 省略号，否则会装进整仓无关包，EdgeOne `/dev/shm` 必炸）：
+
+   **Vercel**（命令长度有限制，用脚本）：
+   - Install：`bash ./scripts/vercel-ci.sh install`
+   - Build：`bash ./scripts/vercel-ci.sh build`
+
+   **EdgeOne Pages**（**不要**加 `--workspace-root`，**不要**用 `pkg...` 省略号）：
 
 ```bash
+# Install
 cd ../.. && pnpm install --ignore-scripts --filter=with-property-work-order --filter=@assistant-ui/react --filter=@assistant-ui/react-markdown --filter=@assistant-ui/next --filter=@assistant-ui/core --filter=@assistant-ui/store --filter=@assistant-ui/tap --filter=@assistant-ui/x-buildutils --filter=@assistant-ui/x-generative-compiler --filter=@assistant-ui/vite --filter=assistant-stream --filter=assistant-cloud --filter=safe-content-frame
 ```
 
-   - Build：
-
 ```bash
+# Build
 cd ../.. && pnpm dlx turbo@2.10.13 build --concurrency=1 --filter=@assistant-ui/react --filter=@assistant-ui/react-markdown --filter=@assistant-ui/next && pnpm --filter with-property-work-order run build
 ```
 
@@ -54,7 +59,7 @@ cd ../.. && pnpm dlx turbo@2.10.13 build --concurrency=1 --filter=@assistant-ui/
 4. 环境变量：`DEEPSEEK_API_KEY`（可选 `DEEPSEEK_MODEL` / `DEEPSEEK_BASE_URL`）。
 5. 部署后打开 `/api/agent` 确认 `llmEnabled: true`。
 
-> EdgeOne 控制台若手填了旧 Install/Build，会覆盖 `edgeone.json`，请改成上面两段再 Redeploy。
+> Vercel / EdgeOne 控制台若手填了旧命令，会覆盖配置文件；Vercel 请填上面两行短命令。
 > 不要使用 `output: 'export'` 纯静态导出，否则无法运行 `/api/agent`。
 
 ## 演示路径
