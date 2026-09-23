@@ -13,16 +13,13 @@ export type AgentAction =
   | "extract"
   | "match"
   | "suggest"
-  | "listOrders"
   | "thinking"
   | "guide";
 
 export type ClassifyResult = {
   intent:
     | "repair"
-    | "list_pending"
     | "suggest_assignee"
-    | "view_created"
     | "reset"
     | "chat";
   reply?: string | undefined;
@@ -74,32 +71,6 @@ export type SuggestResult = {
   recommendedId: string;
   recommendedName: string;
   reasons: string[];
-  thinkingLines: string[];
-};
-
-export type ListOrdersResult = {
-  orders: Array<{
-    id: string;
-    title: string;
-    serviceType: string;
-    category: string;
-    campus: string;
-    space: string;
-    device: string;
-    description: string;
-    contactName: string;
-    contactPhone: string;
-    source: string;
-    status: "待受理" | "待处理";
-    assignee?: string;
-    team?: string;
-    createdAt: string;
-    attachments: Array<{
-      fileName: string;
-      mimeType: string;
-      tag: "现场附件";
-    }>;
-  }>;
   thinkingLines: string[];
 };
 

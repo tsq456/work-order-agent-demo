@@ -133,9 +133,8 @@ export const FALLBACK_REPLY =
 /** 意图不明时的离线引导模板（按用户文本哈希轮换，避免同一句死循环） */
 export const GUIDE_FALLBACK_TEMPLATES = [
   "听到了，不过信息还不太够。请告诉我具体位置和现象，例如：「地下车库B2层灯一直闪烁」。",
-  "我可以帮你报修或查工单。若是报修，请尽量带上地点和故障描述，比如：「总部大楼1号电梯有异响」。",
+  "我可以帮你报修。请尽量带上地点和故障描述，比如：「总部大楼1号电梯有异响」。",
   "这句话我还没法直接建单。你可以改成：「滨江科创园A座卫生间地漏堵塞，需要疏通」。",
-  "如果是要查进度，可以直接说「查看当前待受理工单」；如果是报修，请补充楼栋楼层和问题。",
   "想推荐处理人员的话，需要先有一张工单。你也可以先描述现场问题，我来帮你整理报修。",
   "我理解你在反馈事情，但还缺关键信息。试着发：「智慧产业园3号楼二层空调漏水，我拍了照片」。",
 ] as const;
@@ -149,10 +148,6 @@ export const GUIDE_HINT_SEEDS = [
   {
     angle: "报修缺现象",
     example: "可以说清楚故障表现，例如「灯一直闪烁，影响行车」。",
-  },
-  {
-    angle: "查工单",
-    example: "若要查单，可直接说「查看当前待受理工单」。",
   },
   {
     angle: "推荐分派",
@@ -173,8 +168,8 @@ export function pickGuideFallback(userText: string): string {
   return GUIDE_FALLBACK_TEMPLATES[index]!;
 }
 
-/** 欢迎页随机抽 3 条展示的工单相关快捷问题池 */
-export const WELCOME_PROMPT_POOL = [
+/** 欢迎页固定展示的 3 条报修问题入口 */
+export const WELCOME_PROMPTS = [
   {
     title: "空调漏水报修",
     prompt: "3号楼二层空调漏水，地面已经有积水，我拍了现场照片。",
@@ -187,19 +182,9 @@ export const WELCOME_PROMPT_POOL = [
     title: "电梯异响",
     prompt: "总部大楼1号电梯上下运行时有明显异响，请尽快安排检修。",
   },
-  {
-    title: "卫生间堵塞",
-    prompt: "滨江科创园A座3层卫生间地漏堵塞、有积水，需要疏通。",
-  },
-  {
-    title: "查看已有工单",
-    prompt: "查看当前已有工单",
-  },
-  {
-    title: "推荐处理人员",
-    prompt: "这个工单适合分派给谁？",
-  },
 ] as const;
 
-/** @deprecated 使用 WELCOME_PROMPT_POOL */
-export const SUGGESTION_PROMPTS = WELCOME_PROMPT_POOL;
+/** @deprecated 使用 WELCOME_PROMPTS */
+export const WELCOME_PROMPT_POOL = WELCOME_PROMPTS;
+/** @deprecated 使用 WELCOME_PROMPTS */
+export const SUGGESTION_PROMPTS = WELCOME_PROMPTS;

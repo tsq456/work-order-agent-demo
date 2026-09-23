@@ -45,15 +45,6 @@ export const CAMPUS_SUGGEST_THINKING_LINES = [
   "正在生成处理人员推荐方案…",
 ] as const;
 
-export const CAMPUS_LIST_THINKING_LINES = [
-  "正在识别查看已有工单诉求…",
-  "正在连接物业工单台账…",
-  "正在按状态筛选待受理与待处理工单…",
-  "正在核对工单字段完整性…",
-  "正在整理工单卡片展示…",
-  "马上为你呈现当前工单列表…",
-] as const;
-
 /** Shown while waiting for LLM classify / first token. */
 export const PENDING_WAIT_LINES = [
   "正在理解你的问题…",

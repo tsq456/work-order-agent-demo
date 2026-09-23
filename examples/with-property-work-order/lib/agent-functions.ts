@@ -4,7 +4,6 @@ import type {
   ClassifyResult,
   ExtractResult,
   GuideResult,
-  ListOrdersResult,
   MatchResult,
   SuggestResult,
 } from "@/lib/deepseek";
@@ -12,7 +11,6 @@ import * as mockFns from "@/lib/mock-functions";
 import { pickGuideFallback } from "@/lib/mock-data";
 import {
   CAMPUS_FORM_THINKING_LINES,
-  CAMPUS_LIST_THINKING_LINES,
   CAMPUS_SUGGEST_THINKING_LINES,
   CAMPUS_THINKING_LINES,
 } from "@/lib/stream";
@@ -181,55 +179,6 @@ export async function suggestAssignee(input: {
 
 export async function checkAttachmentRequirement(draft: WorkOrderDraft) {
   return mockFns.checkAttachmentRequirement(draft);
-}
-
-export async function listWorkOrders(input?: { text?: string }) {
-  const llm = await callAgent<ListOrdersResult>("listOrders", {
-    text: input?.text ?? "查看当前已有工单",
-  });
-  if (llm?.orders?.length) {
-    const orders: WorkOrder[] = llm.orders.slice(0, 3).map((item) => {
-      const order: WorkOrder = {
-        id: item.id,
-        title: item.title,
-        serviceType: item.serviceType,
-        category: item.category,
-        campus: item.campus,
-        space: item.space,
-        device: item.device,
-        description: item.description,
-        contactName: item.contactName,
-        contactPhone: item.contactPhone,
-        source: item.source,
-        status: item.status,
-        createdAt: item.createdAt,
-        attachments: (item.attachments ?? []).map((file) => ({
-          fileName: file.fileName,
-          mimeType: file.mimeType,
-          tag: "现场附件" as const,
-        })),
-      };
-      if (item.assignee) order.assignee = item.assignee;
-      if (item.team) order.team = item.team;
-      return order;
-    });
-    return {
-      orders,
-      thinkingLines: llm.thinkingLines,
-      simulated: true as const,
-      source: "llm" as const,
-    };
-  }
-
-  const fallback = await mockFns.listMockWorkOrders(input);
-  return {
-    ...fallback,
-    thinkingLines:
-      fallback.thinkingLines?.length > 0
-        ? fallback.thinkingLines
-        : [...CAMPUS_LIST_THINKING_LINES],
-    source: "mock" as const,
-  };
 }
 
 export const createMockWorkOrder = mockFns.createMockWorkOrder;

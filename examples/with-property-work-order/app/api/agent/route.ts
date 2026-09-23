@@ -8,7 +8,6 @@ import {
   llmClassify,
   llmExtract,
   llmGuide,
-  llmListOrders,
   llmMatch,
   llmSuggest,
   llmThinking,
@@ -84,21 +83,12 @@ export async function POST(req: Request) {
         });
         return NextResponse.json({ ok: true, result });
       }
-      case "listOrders": {
-        const result = await llmListOrders({
-          text: String(input.text ?? "查看当前已有工单"),
-        });
-        return NextResponse.json({ ok: true, result });
-      }
       case "thinking": {
-        const phase = input.phase as "repair" | "form" | "suggest" | "list";
+        const phase = input.phase as "repair" | "form" | "suggest";
         const context = String(input.context ?? "");
         const result = await llmThinking({
           phase:
-            phase === "form" ||
-            phase === "suggest" ||
-            phase === "repair" ||
-            phase === "list"
+            phase === "form" || phase === "suggest" || phase === "repair"
               ? phase
               : "repair",
           context,

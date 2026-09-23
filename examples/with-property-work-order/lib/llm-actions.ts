@@ -5,7 +5,6 @@ import {
   type ClassifyResult,
   type ExtractResult,
   type GuideResult,
-  type ListOrdersResult,
   type MatchResult,
   type SuggestResult,
   type ThinkingResult,
@@ -45,16 +44,14 @@ export async function llmClassify(input: {
       content: `${buildSystemPrompt()}
 根据用户一句话判断意图，返回：
 {
-  "intent": "repair|list_pending|suggest_assignee|view_created|reset|chat",
+  "intent": "repair|suggest_assignee|reset|chat",
   "reply": "当 intent=chat 时给一句简短中文回复，否则可省略"
 }
 规则：
 - 报修、故障、漏水、灯坏、电梯、噪音等 → repair
-- 查待受理列表、查看已有工单、工单列表、我的工单 → list_pending
 - 推荐/分派处理人 → suggest_assignee
-- 查看刚创建的某一张工单详情（带具体编号） → view_created
 - 重置/重新开始 → reset
-- 其他闲聊、模糊、信息不足 → chat；此时 reply 必须是引导用户补充的友好中文（指出缺什么并给示例），禁止只复述能力介绍
+- 查工单列表、闲聊、模糊、信息不足 → chat；此时 reply 必须是引导用户补充报修信息的友好中文（指出缺什么并给示例），禁止只复述能力介绍；本演示不提供查工单列表能力
 当前是否已有演示工单：${input.hasWorkOrder ? "是" : "否"}`,
     },
     { role: "user", content: input.text },
@@ -63,9 +60,7 @@ export async function llmClassify(input: {
   const intent = raw.intent;
   const allowed = [
     "repair",
-    "list_pending",
     "suggest_assignee",
-    "view_created",
     "reset",
     "chat",
   ] as const;
@@ -314,129 +309,8 @@ candidates 3人左右，只能有一人 recommended=true，且 status 必须为�
   };
 }
 
-export async function llmListOrders(input: {
-  text: string;
-}): Promise<ListOrdersResult> {
-  const sources = SOURCE_OPTIONS.map((item) => item.value);
-  const raw = await deepseekJson<ListOrdersResult>([
-    {
-      role: "system",
-      content: `${buildSystemPrompt()}
-用户想查看当前已有工单。请生成恰好 3 条园区物业工单 mock 数据，字段必须与系统 WorkOrder 对齐。
-返回：
-{
-  "orders": [
-    {
-      "id": "WO-2026-xxxx",
-      "title": "短标题",
-      "serviceType": "...",
-      "category": "...",
-      "campus": "...",
-      "space": "空间位置",
-      "device": "设备名称或编号",
-      "description": "问题描述",
-      "contactName": "联系人",
-      "contactPhone": "手机号可打码",
-      "source": "物业管理员代录|业主自助|物业巡检",
-      "status": "待受理|待处理",
-      "assignee": "待处理时填写处理人，待受理可省略",
-      "team": "班组，可省略",
-      "createdAt": "YYYY-MM-DD HH:mm",
-      "attachments": [{"fileName":"xxx.jpg","mimeType":"image/jpeg","tag":"现场附件"}]
-    }
-  ],
-  "thinkingLines": ["5~7条中文思考步骤，体现查询工单库与整理列表"]
-}
-要求：
-- 必须正好 3 条，id 互不重复
-- status 只能是 待受理 或 待处理；待处理应有 assignee
-- source 只能是：${sources.join("、")}
-- 结合用户原话场景生成差异化内容，不要三条雷同`,
-    },
-    { role: "user", content: input.text || "查看当前已有工单" },
-  ]);
-
-  const normalizeOrder = (
-    item: ListOrdersResult["orders"][number] | undefined,
-    index: number,
-  ): ListOrdersResult["orders"][number] => {
-    const status =
-      item?.status === "待处理" || item?.status === "待受理"
-        ? item.status
-        : index === 0
-          ? "待处理"
-          : "待受理";
-    const attachments = Array.isArray(item?.attachments)
-      ? item.attachments
-          .map((file) => ({
-            fileName: asString(file?.fileName, `现场照片-${index + 1}.jpg`),
-            mimeType: asString(file?.mimeType, "image/jpeg"),
-            tag: "现场附件" as const,
-          }))
-          .slice(0, 3)
-      : [
-          {
-            fileName: `现场照片-${index + 1}.jpg`,
-            mimeType: "image/jpeg",
-            tag: "现场附件" as const,
-          },
-        ];
-
-    const order: ListOrdersResult["orders"][number] = {
-      id: asString(item?.id, `WO-2026-${9000 + index}`),
-      title: asString(item?.title, `园区报修工单 ${index + 1}`),
-      serviceType: pickEnum(
-        item?.serviceType,
-        AGENT_ENUMS.serviceTypes,
-        "报修",
-      ),
-      category: pickEnum(
-        item?.category,
-        AGENT_ENUMS.serviceCategories,
-        "综合维修",
-      ),
-      campus: pickEnum(item?.campus, AGENT_ENUMS.campuses, "智慧产业园"),
-      space: asString(item?.space, "公共区域"),
-      device: asString(item?.device, "待核设备"),
-      description: asString(item?.description, "现场问题待跟进"),
-      contactName: asString(item?.contactName, "物业管理员"),
-      contactPhone: asString(item?.contactPhone, "138****0000"),
-      source: pickEnum(item?.source, sources, "物业管理员代录"),
-      status,
-      createdAt: asString(item?.createdAt, "2026-09-22 10:00"),
-      attachments,
-    };
-    const assignee = asString(item?.assignee);
-    const team = asString(item?.team);
-    if (status === "待处理" && assignee) order.assignee = assignee;
-    else if (status === "待处理") order.assignee = "陈师傅";
-    if (team) order.team = team;
-    else if (status === "待处理") order.team = "综合维修组";
-    return order;
-  };
-
-  const rawOrders = Array.isArray(raw.orders) ? raw.orders : [];
-  const orders = [0, 1, 2].map((index) =>
-    normalizeOrder(rawOrders[index], index),
-  );
-
-  return {
-    orders,
-    thinkingLines:
-      asStringArray(raw.thinkingLines).length >= 3
-        ? asStringArray(raw.thinkingLines).slice(0, 8)
-        : [
-            "正在识别查看已有工单诉求…",
-            "正在连接物业工单台账…",
-            "正在按状态筛选待受理与待处理工单…",
-            "正在核对字段完整性…",
-            "正在整理三张工单卡片…",
-          ],
-  };
-}
-
 export async function llmThinking(input: {
-  phase: "repair" | "form" | "suggest" | "list";
+  phase: "repair" | "form" | "suggest";
   context: string;
 }): Promise<ThinkingResult> {
   const raw = await deepseekJson<ThinkingResult>([

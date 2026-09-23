@@ -16,14 +16,12 @@ import { ReplyTypingToolUI } from "@/components/reply-typing-ui";
 import { SuggestAssigneeToolUI } from "@/components/suggest-assignee-tool-ui";
 import { WorkOrderCreatedToolUI } from "@/components/work-order-created-tool-ui";
 import { WorkOrderDraftToolUI } from "@/components/work-order-draft-tool-ui";
-import { WorkOrderListToolUI } from "@/components/work-order-list-tool-ui";
 import { useDemoStore } from "@/lib/demo-store";
 import { EMPTY_DRAFT } from "@/lib/mock-data";
 import * as agentFns from "@/lib/agent-functions";
 import { classifyIntent } from "@/lib/intent";
 import {
   CAMPUS_FORM_THINKING_LINES,
-  CAMPUS_LIST_THINKING_LINES,
   CAMPUS_SUGGEST_THINKING_LINES,
   CAMPUS_THINKING_LINES,
   runThinkingSequence,
@@ -31,7 +29,7 @@ import {
   streamText,
   updateMessageById,
 } from "@/lib/stream";
-import type { AgentTraceStep, WorkOrder, WorkOrderDraft } from "@/lib/types";
+import type { AgentTraceStep, WorkOrderDraft } from "@/lib/types";
 
 /** Append-only thinking lines — never overwrite prior steps. */
 function appendThinkingLine(lines: string[], next: string) {
@@ -111,10 +109,6 @@ const CreatedUI = makeAssistantToolUI({
 const SuggestUI = makeAssistantToolUI({
   toolName: "suggestAssignee",
   render: SuggestAssigneeToolUI,
-});
-const ListOrdersUI = makeAssistantToolUI({
-  toolName: "listWorkOrders",
-  render: WorkOrderListToolUI,
 });
 const ExtractUI = makeAssistantToolUI({
   toolName: "extractWorkOrderFields",
@@ -989,212 +983,6 @@ export function MyRuntimeProvider({ children }: { children: ReactNode }) {
     [appendStreamingReply, finishAssistant, patchAssistant, streamAssistantText],
   );
 
-  /** List existing work orders with thinking + 3 mock cards from DeepSeek/mock. */
-  const runListOrdersFlow = useCallback(
-    async (userText: string, options?: { reuseId?: string }) => {
-      const store = demoRef.current;
-      const assistantId =
-        options?.reuseId ?? nextAssistantId("assistant-list-orders");
-      const thinkingId = `campusThinking-${assistantId}`;
-      const listId = `listWorkOrders-${assistantId}`;
-
-      setIsRunning(true);
-      if (!options?.reuseId) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: assistantId,
-            role: "assistant",
-            status: { type: "running" },
-            content: [{ type: "text", text: "" }],
-          },
-        ]);
-      }
-
-      const intro =
-        "收到查看工单请求。我先核对物业工单台账，再整理当前已有工单给你。";
-      await streamAssistantText(assistantId, intro);
-
-      let thinkingLines: string[] = [];
-      let sequenceLines: string[] = [...CAMPUS_LIST_THINKING_LINES];
-      let steps: AgentTraceStep[] = [
-        {
-          id: "intent",
-          label: "识别为查看已有工单诉求",
-          kind: "agent",
-          status: "done",
-          resultSummary: userText.slice(0, 24) || "查看工单",
-        },
-        {
-          id: "query",
-          label: "物业 Agent 调用 listWorkOrders",
-          kind: "tool",
-          toolName: "listWorkOrders",
-          status: "running",
-        },
-      ];
-      let tools: NestedTool[] = [
-        { toolName: "listWorkOrders", status: "running" },
-      ];
-      let listed: Awaited<ReturnType<typeof agentFns.listWorkOrders>> | null =
-        null;
-
-      const thinkingResult = (done: boolean) => {
-        const line =
-          thinkingLines[thinkingLines.length - 1] ?? "园区助手正在处理…";
-        return {
-          lines: thinkingLines,
-          line,
-          index: Math.max(0, thinkingLines.length - 1),
-          total: Math.max(sequenceLines.length, thinkingLines.length, 1),
-          done,
-          steps,
-          tools,
-          simulated: true as const,
-        };
-      };
-
-      const buildContent = (
-        done: boolean,
-        extra: ContentPart[] = [],
-        texts: string[] = [intro],
-      ): ContentPart[] => [
-        ...texts.map((text) => ({ type: "text" as const, text })),
-        toolCall(
-          "campusThinking",
-          { title: "园区助手思考中" },
-          thinkingResult(done),
-          thinkingId,
-        ),
-        ...extra,
-      ];
-
-      const backendTask = (async () => {
-        thinkingLines = appendThinkingLine(
-          thinkingLines,
-          "正在连接物业工单台账…",
-        );
-        patchAssistant(assistantId, { content: buildContent(false) });
-
-        const result = await agentFns.listWorkOrders({ text: userText });
-        listed = result;
-        if (result.thinkingLines?.length) {
-          sequenceLines = result.thinkingLines;
-        }
-
-        store.upsertWorkOrders(result.orders as WorkOrder[]);
-
-        tools = [
-          {
-            toolName: "listWorkOrders",
-            status: "done",
-            result: {
-              count: result.orders.length,
-              ids: result.orders.map((item) => item.id),
-            },
-          },
-        ];
-        steps = [
-          {
-            id: "intent",
-            label: "识别为查看已有工单诉求",
-            kind: "agent",
-            status: "done",
-          },
-          {
-            id: "query",
-            label: "物业 Agent 调用 listWorkOrders",
-            kind: "tool",
-            toolName: "listWorkOrders",
-            status: "done",
-            resultSummary: `已返回 ${result.orders.length} 条工单`,
-          },
-          {
-            id: "present",
-            label: "整理工单卡片展示",
-            kind: "agent",
-            status: "done",
-            resultSummary: result.orders.map((item) => item.id).join("、"),
-          },
-        ];
-        thinkingLines = appendThinkingLine(
-          thinkingLines,
-          "工单列表已整理完成，正在生成卡片…",
-        );
-        patchAssistant(assistantId, { content: buildContent(false) });
-      })();
-
-      await runThinkingSequence(sequenceLines, (payload) => {
-        thinkingLines = appendThinkingLine(thinkingLines, payload.line);
-        const extras: ContentPart[] = [];
-        if (payload.index >= Math.max(0, sequenceLines.length - 2)) {
-          extras.push(
-            toolCall(
-              "listWorkOrders",
-              { title: "当前已有工单" },
-              { phase: "generating", orders: [], simulated: true as const },
-              listId,
-            ),
-          );
-        }
-        patchAssistant(assistantId, {
-          content: buildContent(false, extras),
-        });
-      });
-
-      await backendTask;
-      const finalListed =
-        listed ?? (await agentFns.listWorkOrders({ text: userText }));
-      store.upsertWorkOrders(finalListed.orders as WorkOrder[]);
-
-      const closing = `已为你整理当前 ${finalListed.orders.length} 条工单，可点开卡片查看详情。`;
-      await streamText(closing, (partial) => {
-        patchAssistant(assistantId, {
-          status: { type: "running" },
-          content: buildContent(
-            true,
-            [
-              toolCall(
-                "listWorkOrders",
-                { title: "当前已有工单" },
-                {
-                  phase: "ready",
-                  orders: finalListed.orders,
-                  simulated: true as const,
-                },
-                listId,
-              ),
-            ],
-            [intro, partial],
-          ),
-        });
-      });
-
-      finishAssistant(assistantId, [
-        { type: "text", text: intro },
-        { type: "text", text: closing },
-        toolCall(
-          "campusThinking",
-          { title: "园区助手思考中" },
-          thinkingResult(true),
-          thinkingId,
-        ),
-        toolCall(
-          "listWorkOrders",
-          { title: "当前已有工单" },
-          {
-            phase: "ready",
-            orders: finalListed.orders,
-            simulated: true as const,
-          },
-          listId,
-        ),
-      ]);
-      setIsRunning(false);
-    },
-    [finishAssistant, patchAssistant, streamAssistantText],
-  );
-
   const onNew = useCallback(
     async (message: AppendMessage) => {
       if (message.content.length !== 1 || message.content[0]?.type !== "text") {
@@ -1244,10 +1032,8 @@ export function MyRuntimeProvider({ children }: { children: ReactNode }) {
             return;
           }
           if (llmIntent?.intent === "repair") intent = "repair";
-          else if (llmIntent?.intent === "list_pending") intent = "list_pending";
           else if (llmIntent?.intent === "suggest_assignee")
             intent = "suggest_assignee";
-          else if (llmIntent?.intent === "view_created") intent = "view_created";
           else if (llmIntent?.intent === "reset") intent = "reset";
           else {
             const guide = await agentFns.guideUnclearIntent({
@@ -1261,11 +1047,6 @@ export function MyRuntimeProvider({ children }: { children: ReactNode }) {
 
         if (intent === "repair") {
           await runRepairClarifyFlow(text, replyOpts);
-          return;
-        }
-
-        if (intent === "list_pending" || intent === "view_created") {
-          await runListOrdersFlow(text, replyOpts);
           return;
         }
 
@@ -1299,7 +1080,6 @@ export function MyRuntimeProvider({ children }: { children: ReactNode }) {
     [
       appendStreamingReply,
       beginPendingReply,
-      runListOrdersFlow,
       runRepairClarifyFlow,
       runSuggestFlow,
     ],
@@ -1391,7 +1171,6 @@ export function MyRuntimeProvider({ children }: { children: ReactNode }) {
       <AttachmentUI />
       <PresentDraftUI />
       <CreatedUI />
-      <ListOrdersUI />
       <SuggestUI />
       <AssignUI />
       <ResetUI />

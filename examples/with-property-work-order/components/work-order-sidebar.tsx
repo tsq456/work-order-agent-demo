@@ -24,7 +24,7 @@ export function WorkOrderSidebar() {
         </div>
         <h1 className="mt-1 text-lg font-semibold text-slate-900">工单面板</h1>
         <p className="mt-1 text-xs text-slate-500">
-          查看待受理 / 待处理工单，并支持重置会话。
+          查看本会话创建的工单，并支持重置会话。
         </p>
       </div>
 
