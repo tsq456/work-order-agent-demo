@@ -1,5 +1,15 @@
 # @assistant-ui/react-ink-markdown
 
+## 0.0.44
+
+### Patch Changes
+
+- fix: render Shiki tokens that use short hex colors
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/core@0.3.21
+  - @assistant-ui/react-ink@0.0.45
+  - @assistant-ui/store@0.3.15
+
 ## 0.0.43
 
 ### Patch Changes

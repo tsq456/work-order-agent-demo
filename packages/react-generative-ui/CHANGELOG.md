@@ -1,5 +1,15 @@
 # @assistant-ui/react-generative-ui
 
+## 0.0.20
+
+### Patch Changes
+
+- fix: preserve model-provided children when rendering `RadioGroup`
+
+- fix: preserve recursive component schema references in generative UI tool parameters.
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - assistant-stream@0.3.45
+
 ## 0.0.19
 
 ### Patch Changes

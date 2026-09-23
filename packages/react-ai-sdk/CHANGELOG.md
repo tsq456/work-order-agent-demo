@@ -1,5 +1,12 @@
 # @assistant-ui/react-ai-sdk
 
+## 1.4.13
+
+### Patch Changes
+
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/ai-sdk@0.0.8
+
 ## 1.4.12
 
 ### Patch Changes

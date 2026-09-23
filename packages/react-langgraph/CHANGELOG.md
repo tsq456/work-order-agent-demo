@@ -1,5 +1,21 @@
 # @assistant-ui/react-langgraph
 
+## 0.14.30
+
+### Patch Changes
+
+- fix: normalize malformed LangGraph tool arguments during conversion
+
+- feat(react-langgraph): keep finalized voice transcripts in the thread and send them to the graph with the next run, which writes them to the thread state; `@assistant-ui/react-langchain/converter` gains `getMessageModality`, which reads the `additional_kwargs.modality` a transcript carries
+
+- fix: discard cached attachments when editing or reloading removes their messages
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/core@0.3.21
+  - assistant-cloud@0.2.3
+  - @assistant-ui/react-langchain@0.0.33
+  - assistant-stream@0.3.45
+  - @assistant-ui/store@0.3.15
+
 ## 0.14.29
 
 ### Patch Changes

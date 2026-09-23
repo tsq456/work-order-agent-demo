@@ -1,5 +1,26 @@
 # @assistant-ui/react-google-adk
 
+## 0.0.32
+
+### Patch Changes
+
+- fix: `useAdkSubmitAuth` answers the pending `adk_request_credential` call with its auth config carrying the credential as `exchangedAuthCredential`, the reply ADK resumes the tool on; an id that is not a pending request throws
+
+- fix: skip malformed ADK message content instead of throwing
+
+- fix: respect response backpressure when streaming ADK events to slow readers.
+
+- fix: keep a tool call's pending approval or interrupt actionable when the call already carries a result, so a question raised by a tool that streamed output first (react-pi partial results) still renders its controls instead of reading as complete
+
+- fix: report an explicit error when an ADK event stream has no body
+
+- fix: allow cancellation while dynamic request headers are resolving
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/core@0.3.21
+  - assistant-cloud@0.2.3
+  - assistant-stream@0.3.45
+  - @assistant-ui/store@0.3.15
+
 ## 0.0.31
 
 ### Patch Changes

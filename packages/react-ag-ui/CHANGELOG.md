@@ -1,5 +1,18 @@
 # @assistant-ui/react-ag-ui
 
+## 0.0.61
+
+### Patch Changes
+
+- fix: fold the prose a turn spoke before a parentless tool call onto that call's container, so a reloaded thread renders the turn as the one message the live run did
+
+- feat(react-ag-ui): keep finalized voice transcripts in the thread, send them with the next run, and store them through a configured history adapter
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/core@0.3.21
+  - assistant-stream@0.3.45
+  - @assistant-ui/store@0.3.15
+  - @assistant-ui/react-generative-ui@0.0.20
+
 ## 0.0.60
 
 ### Patch Changes

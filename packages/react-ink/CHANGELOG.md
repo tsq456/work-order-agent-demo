@@ -1,5 +1,29 @@
 # @assistant-ui/react-ink
 
+## 0.0.45
+
+### Patch Changes
+
+- fix: emit declarations from one TypeScript program so two builds of the same commit produce the same `.d.ts`
+  
+  `aui-build` now emits the unbundled `.d.ts` output in one TypeScript pass over the whole package, so two builds of the same commit produce identical declarations; the per-module emit it replaced followed the bundler's load order and let union member order, alias visibility and import specifiers move between builds. Declarations import barrels as the source does and keep `import type`; the exported types are unchanged. A `/// <reference>` directive that must reach the published declarations now carries `preserve="true"` in the source.
+
+- fix: every distribution re-exports the same shared surface from `@assistant-ui/core`. `@assistant-ui/react-ink` gains `ReadonlyThreadProvider`, `ToolCallMessagePartStatus`, `groupPartByType`, `GroupByContext`, `VoiceSessionState`, the external store runtime (`useExternalStoreRuntime`, `useExternalMessageConverter`, their adapters and options), the message queue, the tool approval types, the generative UI renderer and the cloud thread list hooks; `@assistant-ui/react-native` gains `VoiceSessionState`, the cloud thread list hooks, the generative UI renderer and the runtime state and adapter types the web package already carried; `@assistant-ui/react` gains `MessageRole`, `RunConfig`, `RuntimeCapabilities`, `RemoteThreadListOptions`, `ThreadsState`, `JoinStrategy`, `TitleGenerationAdapter`, `createSimpleTitleAdapter` and `ChainOfThoughtPartByIndexProvider`.
+
+- feat: name the runtime state types `ThreadRuntimeState`, `MessageRuntimeState`, `ComposerRuntimeState`, `AttachmentRuntimeState` and `ThreadListItemRuntimeState`
+  
+  these are the states `ThreadRuntime`, `MessageRuntime`, `ComposerRuntime`, `AttachmentRuntime` and `ThreadListItemRuntime` return from `getState()`, now exported by all three distributions; `@assistant-ui/react-native` and `@assistant-ui/react-ink` had no name for them. in `@assistant-ui/react`, `ThreadState`, `MessageState`, `ComposerState`, `AttachmentState` and `ThreadListItemState` still name these runtime states but are deprecated: from 0.16 they name the store states `useAuiState` reads, as they already do in `@assistant-ui/react-native` and `@assistant-ui/react-ink`. code that annotates a runtime's `getState()` result should move to the new names.
+
+- feat(core): let typed text enter a connected voice session through `sendText`
+  
+  a `RealtimeVoiceAdapter.Session` (and the `VoiceSessionControls` returned to `createVoiceSession`) can implement `sendText(text)`. while a running session takes typed text, `VoiceSessionState.canSendText` is true, the thread composer can send, and `thread.append` with a plain text user message hands the text to the session and commits it once as a typed turn (no `metadata.modality`) through the same path as a finalized transcript: the local runtime writes it to the repository and history, an external store receives it through `onVoiceTranscript`. the session must not echo the typed text through `onTranscript`. a session without `sendText` keeps rejecting typed sends as before. while a session is connected the send button and the Enter key follow `canSend` alone, so a reply being spoken no longer blocks them. the ai-sdk runtime keeps the message's own modality when it persists a voice session message, so a typed turn is no longer marked as spoken.
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/core@0.3.21
+  - assistant-cloud@0.2.3
+  - assistant-stream@0.3.45
+  - @assistant-ui/store@0.3.15
+  - @assistant-ui/tap@0.9.19
+
 ## 0.0.44
 
 ### Patch Changes

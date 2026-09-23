@@ -1,5 +1,29 @@
 # @assistant-ui/x-buildutils
 
+## 0.0.29
+
+### Patch Changes
+
+- fix: fail the build when emitted output imports an undeclared package
+  
+  `aui-build` kept package imports external without checking them against the manifest, so emitted JavaScript or declarations could import a package a consumer cannot resolve. A build now allows only the package's own name, its declared dependencies, peers and optional dependencies (with a `@types/*` package standing in for the module it types), its `imports` map and node builtins. tsdown's `deps.onlyImport` covers import statements; a pass over the finished declarations covers the two shapes it does not visit, an inline `import("pkg").Type` and a `/// <reference types="pkg" />` directive.
+  
+  Test helpers, `testUtils` modules and benches under `src` are no longer build entries. They were unreachable through every exports map and carried `vitest` and `ink-testing-library` imports into published output.
+  
+  `@assistant-ui/react-streamdown` declares `remark-rehype`, whose `Options` type it re-exports as `RemarkRehypeOptions`.
+
+- chore: cover the undeclared-import guard with tests
+  
+  The allowlist and declaration scan behind the undeclared-import guard move unchanged to `src/declared-imports.ts`, where `node --test` pins the `@types/*` mapping, specifier splitting, builtin listing and the two declaration shapes the scan reports. Test files stay out of the published tarball.
+
+- fix(build): catch statement-level type imports in published declarations
+
+- fix: emit declarations from one TypeScript program so two builds of the same commit produce the same `.d.ts`
+  
+  `aui-build` now emits the unbundled `.d.ts` output in one TypeScript pass over the whole package, so two builds of the same commit produce identical declarations; the per-module emit it replaced followed the bundler's load order and let union member order, alias visibility and import specifiers move between builds. Declarations import barrels as the source does and keep `import type`; the exported types are unchanged. A `/// <reference>` directive that must reach the published declarations now carries `preserve="true"` in the source.
+
+- fix: sort the entry list so two builds of the same commit emit identical javascript
+
 ## 0.0.28
 
 ### Patch Changes

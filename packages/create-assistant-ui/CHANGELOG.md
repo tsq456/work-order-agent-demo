@@ -1,5 +1,12 @@
 # create-assistant-ui
 
+## 0.0.81
+
+### Patch Changes
+
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - assistant-ui@0.0.118
+
 ## 0.0.80
 
 ### Patch Changes

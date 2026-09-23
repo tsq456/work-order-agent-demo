@@ -1,5 +1,23 @@
 # assistant-cloud
 
+## 0.2.3
+
+### Patch Changes
+
+- fix: useCloudRuntime sends the active Cloud thread id, including on the first run of a new thread, and pins the ui message stream protocol
+
+- fix: report cloud engagement events once per thread list instead of once per mounted thread, keep counting a run that ends while its thread is in the background, and let an engagement id resolver decline an event for a thread it does not know
+
+- fix(cloud): summarize base64 blocks inside an MCP `CallToolResult` instead of shipping them raw
+
+- fix: expose caller-supplied cost, attributes, and root span fields on run reports
+
+- fix: accept a step input and every run outcome type on run reports
+
+- fix(cloud): measure a send's idle time from a stopped run instead of the last completed one
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - assistant-stream@0.3.45
+
 ## 0.2.2
 
 ### Patch Changes

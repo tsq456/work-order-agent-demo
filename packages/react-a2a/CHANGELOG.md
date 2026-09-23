@@ -1,5 +1,21 @@
 # @assistant-ui/react-a2a
 
+## 0.2.37
+
+### Patch Changes
+
+- fix: clear the message repository before switching A2A threads
+
+- feat(react-a2a): keep finalized voice transcripts in the thread and store them through a configured history adapter; the agent does not receive them, since A2A has no way to record a message without asking the agent to act on it
+
+- fix: load persisted history independently of agent-card discovery
+
+- fix: allow cancellation while dynamic request headers are resolving
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/core@0.3.21
+  - assistant-stream@0.3.45
+  - @assistant-ui/store@0.3.15
+
 ## 0.2.36
 
 ### Patch Changes

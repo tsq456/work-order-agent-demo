@@ -1,5 +1,31 @@
 # @assistant-ui/react-streamdown
 
+## 0.3.17
+
+### Patch Changes
+
+- fix: fail the build when emitted output imports an undeclared package
+  
+  `aui-build` kept package imports external without checking them against the manifest, so emitted JavaScript or declarations could import a package a consumer cannot resolve. A build now allows only the package's own name, its declared dependencies, peers and optional dependencies (with a `@types/*` package standing in for the module it types), its `imports` map and node builtins. tsdown's `deps.onlyImport` covers import statements; a pass over the finished declarations covers the two shapes it does not visit, an inline `import("pkg").Type` and a `/// <reference types="pkg" />` directive.
+  
+  Test helpers, `testUtils` modules and benches under `src` are no longer build entries. They were unreachable through every exports map and carried `vitest` and `ink-testing-library` imports into published output.
+  
+  `@assistant-ui/react-streamdown` declares `remark-rehype`, whose `Options` type it re-exports as `RemarkRehypeOptions`.
+
+- fix(react-streamdown): stop an unmatched mid-line `$$` from pairing with later display math
+
+- fix: stop nested raw pre markup from causing quadratic rerender comparisons
+
+- fix: let a new `SyntaxHighlighter`, `CodeHeader` or `componentsByLanguage` entry reach settled code blocks
+  
+  a code block that streamdown had already rendered kept the previous highlighter or header when `components.SyntaxHighlighter`, `components.CodeHeader` or an entry of `componentsByLanguage` changed without new text, because streamdown's root memo ignores `components` and never re-renders the block. the code adapter now reads its components from a context that the primitive provides above streamdown, so the change reaches every mounted code block in place; the block, its siblings and the rest of the message keep their DOM and state, and a streamed token still re-renders nothing that has settled.
+
+- fix: keep the streaming escapes out of every fence and `$$` block, including one that opens right after a paragraph line or nests in a list item, and settle the paragraph a block interrupts, so `~` inside code and math is no longer escaped and a dangling `**` before a fence no longer lands its closer after the closing marker
+
+- fix: recognize a fence or `$$` block that opens on a list marker line (`- ~~~`, ``1. ```bash``, `- $$`), so `~` inside it is no longer escaped and its closing marker no longer opens a fence that leaves the rest of the message without streaming repair or escapes
+
+- fix(react-streamdown): stop `preprocess` from restarting smooth streaming when a rewrite changes already-revealed text
+
 ## 0.3.16
 
 ### Patch Changes

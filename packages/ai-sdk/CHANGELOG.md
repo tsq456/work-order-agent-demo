@@ -1,5 +1,51 @@
 # @assistant-ui/ai-sdk
 
+## 0.0.8
+
+### Patch Changes
+
+- fix: read select and text approval requests from the AI SDK approval descriptor
+  
+  an approval request streamed through the AI SDK can now declare its `prompt`, `display`, `allowFreeform` and `options` in the `approvalDescriptor` of its `tool-approval-request` chunk, the one slot that survives `processUIMessageStream` and `validateUIMessages`. the converter reads those fields, plus a recorded `optionId`, `text` and `resolution`, from a descriptor object when the approval itself does not carry them, under the same `onRespondToToolApproval` gate as before. `id`, `approved`, `reason` and `isAutomatic` always come from the AI SDK, and the descriptor stays on the part unchanged.
+
+- fix: clone AssistantChatTransport per thread in useChatThread
+  
+  A single `AssistantChatTransport` passed to `useChatRuntime` was shared across every thread `useRemoteThreadListRuntime` keeps mounted. Because each `useChatThread` wires the transport (`setRuntime`, `getThreadListItem`) during render, the wiring was last-writer-wins: a streaming thread re-rendering on each chunk could re-point the shared transport, so another thread's request went out with the wrong `remoteId` and model context. `useChatThread` now clones an `AssistantChatTransport` per thread — mirroring what `AISDKThreads` already does — so each thread's wiring is private. A caller-owned chat (the `AISDKThreads` path) still uses the supplied instance, since it already clones and binds the chat to it.
+  
+  Note: the per-thread clone is reconstructed via `new (this.constructor)(initOptions)`. A custom `AssistantChatTransport` subclass whose constructor takes different arguments, or that mutates instance state after construction, will not carry that state onto the clone.
+
+- fix(ai-sdk): cancel pending tool calls left behind a staged message
+
+- fix: emit declarations from one TypeScript program so two builds of the same commit produce the same `.d.ts`
+  
+  `aui-build` now emits the unbundled `.d.ts` output in one TypeScript pass over the whole package, so two builds of the same commit produce identical declarations; the per-module emit it replaced followed the bundler's load order and let union member order, alias visibility and import specifiers move between builds. Declarations import barrels as the source does and keep `import type`; the exported types are unchanged. A `/// <reference>` directive that must reach the published declarations now carries `preserve="true"` in the source.
+
+- fix: stop a nested `useChatRuntime` chat when its own component unmounts, stop registering `AISDKThreads` cloud threads on the client destroy signal, and stop fast refresh from aborting the destroy signal of `useAui(config)` hosts
+
+- feat: mark interim tool output as `isPreliminary` so a tool that streams its result stays running until the final result lands, instead of reading as complete on the first chunk; react-pi flags live `partialResult` output and ai-sdk flags `preliminary` outputs, and the default tool fallback keeps the output a cancelled tool streamed before it was cut off
+
+- fix: preserve prototype-named custom message metadata
+
+- fix: correct settled and failed tool-call arg conversion
+  
+  Stop re-reporting a settled tool call's unchanged arguments each time it is reconverted (which could OOM the renderer on large args), skip re-serializing them while the call keeps the same input object, and preserve a schema-failed tool call's arguments from `rawInput` instead of converting the error snapshot to `{}`.
+
+- feat: let a tool approval question declare that it accepts a dismissal
+  
+  `ToolCallMessagePart.approval` gains an optional request field, `dismissible`. a question (`display: "select"` or `"text"`) offers no refusal by default, because the kit never fabricates one the host did not ask for; a host that records a dismissal sets `dismissible: true` and the default tool fallback renders a Dismiss control that sends `{ approved: false }` with no answer attached. the fallback also submits a text answer as typed, an empty one included, instead of gating Send on visible text; a host that cannot record an empty answer rejects the response and the controls come back with its error.
+  
+  `@assistant-ui/react-pi` projects Pi `select`, `input` and `editor` requests as dismissible, since Pi resolves a cancelled request with `undefined` and the runtime already maps `approved: false` to that dismissal. `@assistant-ui/ai-sdk` reads `dismissible` from the `approvalDescriptor` like the other request fields.
+
+- feat(core): let typed text enter a connected voice session through `sendText`
+  
+  a `RealtimeVoiceAdapter.Session` (and the `VoiceSessionControls` returned to `createVoiceSession`) can implement `sendText(text)`. while a running session takes typed text, `VoiceSessionState.canSendText` is true, the thread composer can send, and `thread.append` with a plain text user message hands the text to the session and commits it once as a typed turn (no `metadata.modality`) through the same path as a finalized transcript: the local runtime writes it to the repository and history, an external store receives it through `onVoiceTranscript`. the session must not echo the typed text through `onTranscript`. a session without `sendText` keeps rejecting typed sends as before. while a session is connected the send button and the Enter key follow `canSend` alone, so a reply being spoken no longer blocks them. the ai-sdk runtime keeps the message's own modality when it persists a voice session message, so a typed turn is no longer marked as spoken.
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/core@0.3.21
+  - assistant-cloud@0.2.3
+  - assistant-stream@0.3.45
+  - @assistant-ui/store@0.3.15
+  - @assistant-ui/tap@0.9.19
+
 ## 0.0.7
 
 ### Patch Changes

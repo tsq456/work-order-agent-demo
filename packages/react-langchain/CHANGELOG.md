@@ -1,5 +1,32 @@
 # @assistant-ui/react-langchain
 
+## 0.0.33
+
+### Patch Changes
+
+- fix(build): catch statement-level type imports in published declarations
+
+- fix: emit declarations from one TypeScript program so two builds of the same commit produce the same `.d.ts`
+  
+  `aui-build` now emits the unbundled `.d.ts` output in one TypeScript pass over the whole package, so two builds of the same commit produce identical declarations; the per-module emit it replaced followed the bundler's load order and let union member order, alias visibility and import specifiers move between builds. Declarations import barrels as the source does and keep `import type`; the exported types are unchanged. A `/// <reference>` directive that must reach the published declarations now carries `preserve="true"` in the source.
+
+- fix: keep a subagent transcript scoped to its own namespace, so a nested subagent's messages no longer replace its parent's transcript while the nested task runs
+
+- fix: keep messages stable across values events when UI lives in graph state
+  
+  `useStreamRuntime` reconverted every root message and every nested subagent transcript on each `values` event when `stream.values.ui` (or the configured `uiStateKey`) held generative UI, even when its contents had not changed. The SDK rebuilds the `values` object from every snapshot and reconciles only the messages slot by id, so an unchanged UI list arrives as a new array of new entries on every superstep and every cached conversion missed. The runtime now recovers entry identity where the snapshot enters the merge: an entry structurally equal to the previous entry with its id keeps the previous object, and an unchanged list keeps the previous list, so the merged UI map, the converter and the subagent transcripts only change when the UI state does.
+  
+  `@assistant-ui/core/internal` exports `isJSONValueEqual`.
+
+- feat(react-langchain): keep finalized voice transcripts in the thread and send them to the graph with the next run, which writes them to the thread state; an edit or regenerate after them forks from before them and sends them again
+
+- feat(react-langgraph): keep finalized voice transcripts in the thread and send them to the graph with the next run, which writes them to the thread state; `@assistant-ui/react-langchain/converter` gains `getMessageModality`, which reads the `additional_kwargs.modality` a transcript carries
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - @assistant-ui/core@0.3.21
+  - assistant-cloud@0.2.3
+  - assistant-stream@0.3.45
+  - @assistant-ui/store@0.3.15
+
 ## 0.0.32
 
 ### Patch Changes

@@ -1,5 +1,108 @@
 # @assistant-ui/core
 
+## 0.3.21
+
+### Patch Changes
+
+- fix: useCloudRuntime sends the active Cloud thread id, including on the first run of a new thread, and pins the ui message stream protocol
+
+- fix(core): keep a message appended during a local history load on the loaded branch
+
+- fix(core): keep image filename and text/image provider metadata through the aui/v0 encoder
+
+- fix: roll back subscriptions when connecting to their source fails
+
+- fix: validate persisted assistant statuses and steps before loading history
+
+- fix: keep app-scoped interactables isolated and persist edits made before adapter attachment
+  fix: preserve loaded and unmounted app entries in persistence adapter snapshots
+
+- fix: report cloud engagement events once per thread list instead of once per mounted thread, keep counting a run that ends while its thread is in the background, and let an engagement id resolver decline an event for a thread it does not know
+
+- fix: attempt every runtime cleanup when an unsubscribe throws
+
+- fix(core): report isLast on the message client, not only on the thread list
+
+- fix: keep a tool call's pending approval or interrupt actionable when the call already carries a result, so a question raised by a tool that streamed output first (react-pi partial results) still renders its controls instead of reading as complete
+
+- fix(core): spoken user turns no longer carry a `status`, which only assistant messages accept, so a host that stores a voice transcript and converts it back through `convertMessage` no longer throws
+
+- fix: emit declarations from one TypeScript program so two builds of the same commit produce the same `.d.ts`
+  
+  `aui-build` now emits the unbundled `.d.ts` output in one TypeScript pass over the whole package, so two builds of the same commit produce identical declarations; the per-module emit it replaced followed the bundler's load order and let union member order, alias visibility and import specifiers move between builds. Declarations import barrels as the source does and keep `import type`; the exported types are unchanged. A `/// <reference>` directive that must reach the published declarations now carries `preserve="true"` in the source.
+
+- fix(core): keep nested required fields in interactable update tool schemas, so the model sends a nested object whole instead of a partial one that the shallow merge would store as is
+
+- refactor: make the replay boundary stream clear its own replay state on read failures and cancellation, so the transition out of replay mode is balanced with the transition in
+
+- fix: prevent late local-storage history writes from restoring deleted threads
+
+- fix: keep a nested object's unwritten fields while an interactable update streams it
+
+- fix: keep messages stable across values events when UI lives in graph state
+  
+  `useStreamRuntime` reconverted every root message and every nested subagent transcript on each `values` event when `stream.values.ui` (or the configured `uiStateKey`) held generative UI, even when its contents had not changed. The SDK rebuilds the `values` object from every snapshot and reconciles only the messages slot by id, so an unchanged UI list arrives as a new array of new entries on every superstep and every cached conversion missed. The runtime now recovers entry identity where the snapshot enters the merge: an entry structurally equal to the previous entry with its id keeps the previous object, and an unchanged list keeps the previous list, so the merged UI map, the converter and the subagent transcripts only change when the UI state does.
+  
+  `@assistant-ui/core/internal` exports `isJSONValueEqual`.
+
+- fix(core): persist a tool result added after its message settled through the history adapter's `update`, and report a cloud run only from the write that first settles its message; Assistant Cloud still rejects rewriting a message that later turns follow
+
+- fix: tear down late voice controls at most once while preserving cleanup after early cancellation and the original session end reason.
+
+- fix(core): refresh model context subscribers when the main thread runtime attaches
+
+- fix: resolve component registries by own keys only, so a component, tool or data part name that only `Object.prototype` has (`toString`, `constructor`, `__proto__`) takes the `Fallback` or `GenerativeUIRenderError` path instead of rendering the inherited built-in
+
+- feat: mark interim tool output as `isPreliminary` so a tool that streams its result stays running until the final result lands, instead of reading as complete on the first chunk; react-pi flags live `partialResult` output and ai-sdk flags `preliminary` outputs, and the default tool fallback keeps the output a cancelled tool streamed before it was cut off
+
+- fix(core): settle a tool call only on its final result in the tool tracker, aui/v0 persistence and `addToolResult`
+  
+  the external store tool tracker settled a call on its first interim result, so a `streamCall` reader resolved with that value and never saw the final one. the aui/v0 encoder dropped `isPreliminary`, so a thread saved while a tool was streaming reloaded with the interim value as its final result. the local runtime's `addToolResult` treated a call holding an interim result as already answered, so the final result neither resumed the run nor persisted the paused message.
+
+- fix: preserve falsy error payloads such as `0`, `""` and `false` in external runtimes, while continuing to treat `null` as no error
+
+- fix: clean up dictation sessions when listener setup fails
+
+- fix: reuse successful attachment uploads after a sibling fails in both runtime and ExternalThread composers, while preserving cleanup when the unsent draft is discarded.
+
+- feat: name the runtime state types `ThreadRuntimeState`, `MessageRuntimeState`, `ComposerRuntimeState`, `AttachmentRuntimeState` and `ThreadListItemRuntimeState`
+  
+  these are the states `ThreadRuntime`, `MessageRuntime`, `ComposerRuntime`, `AttachmentRuntime` and `ThreadListItemRuntime` return from `getState()`, now exported by all three distributions; `@assistant-ui/react-native` and `@assistant-ui/react-ink` had no name for them. in `@assistant-ui/react`, `ThreadState`, `MessageState`, `ComposerState`, `AttachmentState` and `ThreadListItemState` still name these runtime states but are deprecated: from 0.16 they name the store states `useAuiState` reads, as they already do in `@assistant-ui/react-native` and `@assistant-ui/react-ink`. code that annotates a runtime's `getState()` result should move to the new names.
+
+- fix: correct settled and failed tool-call arg conversion
+  
+  Stop re-reporting a settled tool call's unchanged arguments each time it is reconverted (which could OOM the renderer on large args), skip re-serializing them while the call keeps the same input object, and preserve a schema-failed tool call's arguments from `rawInput` instead of converting the error snapshot to `{}`.
+
+- fix: suggestion chips with `send` follow the voice session's `canSendText` instead of the run state, so a chip clicked during a spoken reply sends its prompt into a connected session that takes typed text, and stays disabled while the session cannot
+
+- fix: key each rendered suggestion by its content instead of its array index, so removing or reordering a suggestion no longer displays a removed suggestion's component state against a surviving one
+
+- fix: render numeric and nested-array generative UI children
+  
+  `GenerativeUINode` now also accepts `number` and `readonly GenerativeUINode[]`. Code that narrows the union exhaustively needs cases for the new members; component `children` remains a `readonly GenerativeUINode[]`.
+
+- fix: ignore malformed AssistantFrame messages
+
+- feat: let a tool approval question declare that it accepts a dismissal
+  
+  `ToolCallMessagePart.approval` gains an optional request field, `dismissible`. a question (`display: "select"` or `"text"`) offers no refusal by default, because the kit never fabricates one the host did not ask for; a host that records a dismissal sets `dismissible: true` and the default tool fallback renders a Dismiss control that sends `{ approved: false }` with no answer attached. the fallback also submits a text answer as typed, an empty one included, instead of gating Send on visible text; a host that cannot record an empty answer rejects the response and the controls come back with its error.
+  
+  `@assistant-ui/react-pi` projects Pi `select`, `input` and `editor` requests as dismissible, since Pi resolves a cancelled request with `undefined` and the runtime already maps `approved: false` to that dismissal. `@assistant-ui/ai-sdk` reads `dismissible` from the `approvalDescriptor` like the other request fields.
+
+- fix: carry a tool result's `modelContent` across the data-stream wire and aui/v0 persistence
+  
+  The data-stream encoder dropped `modelContent` from the tool result frame and the aui/v0 cloud encoder dropped it from the stored tool-call part, so a tool that returned a large UI blob plus a short model summary sent the blob to the model, and a reloaded cloud thread disagreed with the localStorage boundary, which kept the field.
+
+- fix: drop a voice transcript or typed turn whose thread runtime is replaced or unmounted before it commits. one held for a pending history load no longer waits forever, so a typed turn's `append` resolves, and a typed turn still sending is no longer written to the replaced runtime's history or handed to its `onVoiceTranscript`
+
+- fix: hold a voice transcript or typed turn until a pending thread history load settles, so it is committed onto the loaded thread instead of a branch the import leaves behind. A thread switched before the load ends drops the waiting message rather than committing it under the wrong thread
+
+- feat(core): let typed text enter a connected voice session through `sendText`
+  
+  a `RealtimeVoiceAdapter.Session` (and the `VoiceSessionControls` returned to `createVoiceSession`) can implement `sendText(text)`. while a running session takes typed text, `VoiceSessionState.canSendText` is true, the thread composer can send, and `thread.append` with a plain text user message hands the text to the session and commits it once as a typed turn (no `metadata.modality`) through the same path as a finalized transcript: the local runtime writes it to the repository and history, an external store receives it through `onVoiceTranscript`. the session must not echo the typed text through `onTranscript`. a session without `sendText` keeps rejecting typed sends as before. while a session is connected the send button and the Enter key follow `canSend` alone, so a reply being spoken no longer blocks them. the ai-sdk runtime keeps the message's own modality when it persists a voice session message, so a typed turn is no longer marked as spoken.
+- Updated dependencies [`e1ce6eb`, `e1ce6eb`, `e1ce6eb`, `e1ce6eb`]:
+  - assistant-stream@0.3.45
+
 ## 0.3.20
 
 ### Patch Changes

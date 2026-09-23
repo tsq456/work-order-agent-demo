@@ -1,5 +1,15 @@
 # @assistant-ui/react-lexical
 
+## 0.2.15
+
+### Patch Changes
+
+- fix: build the composer with `LexicalExtensionComposer` instead of the deprecated `LexicalComposer`, with `PlainTextExtension` and `HistoryExtension` replacing the legacy plugins. The editable textbox now carries `aria-placeholder`, and the visual placeholder is hidden from assistive technology.
+
+- chore: migrate to Lexical 0.51
+
+- fix: declare `lexical` and the `@lexical/*` packages as peer dependencies, so the app resolves one copy of lexical and custom plugins passed as `LexicalComposerInput` children find the composer context. npm, pnpm and bun install the peers on their own; a yarn app adds `lexical`, `@lexical/react`, `@lexical/utils`, `@lexical/history` and `@lexical/plain-text` itself
+
 ## 0.2.14
 
 ### Patch Changes

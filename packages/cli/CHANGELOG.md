@@ -1,5 +1,27 @@
 # assistant-ui
 
+## 0.0.118
+
+### Patch Changes
+
+- fix: keep forced child exits active until the process closes
+
+- feat: `assistant-ui agent` now opens Claude Code with the maintained skills from `assistant-ui/skills`, fetched at a pinned commit into the user cache, instead of a plugin bundled in the package. the bundled copy had drifted from the AI SDK it teaches ([#7486](https://github.com/assistant-ui/assistant-ui/issues/7486)) and is removed from the package.
+
+- fix: make the assistant-ui agent skill scaffold a working AI SDK 7 chat route, matching the files the ai-sdk-quick-start registry preset installs
+
+- fix(cli): make the create project-name default reachable
+
+- fix: stop the assistant-ui agent skill from listing `@assistant-ui/ui`, which is private, and `@assistant-ui/styles`, which is deprecated
+
+- fix(cli): stop upgrade from silently skipping installs on non-interactive stdin
+  
+  `assistant-ui upgrade` reached its dependency prompts, printed them, and then stopped without installing — exiting 0 and never printing `Upgrade complete!` — whenever stdin was not interactive (CI, an agent harness, `< /dev/null`). Every prompt now settles.
+  
+  Note the resulting non-interactive behaviour: at EOF (or Ctrl+D) a prompt takes its own default, so `upgrade` installs the packages its codemods just rewrote imports onto, rather than leaving the project referencing packages it never installed. Cancelling a prompt with Ctrl+C declines instead, so nothing is installed. Piping a single answer (`echo n | assistant-ui upgrade`) still works and is still honoured, including without a trailing newline.
+
+- fix: prevent timed-out template downloads from writing into the project
+
 ## 0.0.117
 
 ### Patch Changes

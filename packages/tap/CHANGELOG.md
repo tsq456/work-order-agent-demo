@@ -1,5 +1,11 @@
 # @assistant-ui/tap
 
+## 0.9.19
+
+### Patch Changes
+
+- fix: bail out of a no-op state dispatch from an effect under a React host instead of re-rendering on every commit
+
 ## 0.9.18
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @assistant-ui/react-devtools
 
+## 1.2.21
+
+### Patch Changes
+
+- fix(react-devtools): show an Error's name, message and stack instead of an empty object
+
+- fix: preserve snapshots for prototype-named thread ids
+
 ## 1.2.20
 
 ### Patch Changes
